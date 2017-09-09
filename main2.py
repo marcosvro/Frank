@@ -1,7 +1,12 @@
 import numpy as np
 import time
 import ikpy as ik
+import spidev
 
+#comunicacao
+spi = spidev.SpiDev()
+spi.open(0, 0)
+spi.max_speed_hz = 5000
 
 #perna esquerda
 link1 = ik.link.URDFLink("pe_esq", [0, -3, 0], [0, 0, 0], [1, 0, 0], use_symbolic_matrix=True)
@@ -21,9 +26,16 @@ perna_dir = ik.chain.Chain([link5, link6, link7, link8], [True, True, True, True
 
 joints = [0] * len(perna_esq.links)
 joints2 = [0] * len(perna_dir.links)
-target = [0, 0, 23]
+target = [0, -3, 23]
 frame_target = np.eye(4)
 frame_target[:3, 3] = target
 ik = perna_esq.inverse_kinematics(frame_target,initial_position=joints)
 ik2 = perna_dir.inverse_kinematics(frame_target,initial_position=joints2)
-print np.rad2drag(ik)
+ik = np.rad2deg(ik)
+ik = ik.astype('unicode')
+print "sending ", ik
+
+#LOOP
+while 1:
+        to_send = [0x01, 0x02, 0x03]
+        spi.xfer(to_send)
