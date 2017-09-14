@@ -8,12 +8,12 @@ from ikpy import plot_utils
 import spidev
 
 
-frameRate = 0.
 deslocamentoXpelves = 13.
 periodo = 3.
-nEstados = 0.
-dMovx = 0.
-data = 0.
+nEstados = 1000
+dMovx = deslocamentoXpelves/nEstados
+frameRate = periodo/nEstados
+data = np.zeros((nEstados,8), dtype=np.int8)
 
 
 g = 9.8
@@ -101,13 +101,6 @@ def calculaTragetoria():
 		thread.start()
 		thread.join()
 		i += 1;
-
-def setFrame(numEstados):
-	n_estados = numEstados
-	dmx = deslocamentoXpelves/n_estados
-	frate = periodo/n_estados
-	vetor = np.zeros((n_estados,8), dtype=np.int8)
-	return n_estados, frate, vetor, dmx
 	
 def plot_chain (corrente, juntas=None, alvo=None):
 	if juntas is None:
@@ -124,12 +117,11 @@ def calculaSinalY(tempo):
 #SETUP
 #print(np.rad2deg(ik))
 #plot_chain(foot2pelv, juntas=ik, alvo=pos_inicial)
-nEstados, frameRate, data, dMovx = setFrame(1000)
-print ("Calculando tragetoria.. ")
+print "Calculando tragetoria.. "
 calculaTragetoria()
 while threading.active_count() != 1:
 	os.system("clear")
-	print ("Calculando tragetoria.. (", threading.active_count(),"/",nEstados,")")
+	print "Calculando tragetoria.. (", threading.active_count(),"/",nEstados,")"
 
 
 #LOOP
@@ -156,7 +148,7 @@ while 1:
 	#fps calculator
 	if t_fps > 1:
 		os.system("clear")
-		print ("fps:", fps)
+		print "fps:", fps
 		t_fps = 0
 		fps = 0
 	fps += 1
