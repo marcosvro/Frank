@@ -11,7 +11,7 @@ freq = 2*np.pi/3.
 #comunicacao
 spi = spidev.SpiDev()
 spi.open(0, 0)
-spi.max_speed_hz = 16000
+spi.max_speed_hz = 72000
 
 #perna esquerda
 link0 = ik.link.URDFLink("calc_esq", [0, 0, 0], [0, 0, 0], [0, 1, 0], use_symbolic_matrix=True, bounds=(-60,60))
@@ -58,24 +58,32 @@ while 1:
 	t_fps += dTime
 
 	#fps calculator
- 	'''if t_fps > 1:
+ 	if t_fps > 1:
                 os.system("clear")
-                print "fps:", fps
+                print "Tuplas/s:", fps
                 t_fps = 0
                 fps = 0
-        fps += 1
-        '''
+	#fps += 1        
 
 	#solving inverse kinematic
-        variante = np.sin(t*freq) * 5
-        target[1] = variante
-        arm.ee = target
-        ik = np.round(np.rad2deg(arm.angles))
+        #variante = np.sin(t*freq) * 5
+        #target[1] = variante
+        #arm.ee = target
+        #ik = np.round(np.rad2deg(arm.angles))
         
         #sending data
-        to_send = np.array([127,0,1,2,3,4,5,6,7,8,9,10,11,-127], dtype=np.int8)
+	to_send = np.array([254,0,1,2,3,4,5,6,7,253], dtype=np.uint8)
         spi.writebytes(to_send.tolist())
-        print ik
+	
+	#print spi.readbytes(10)
+	if int(spi.readbytes(1)[0]) == 0xFE:
+		s = spi.readbytes(8);
+		if int(spi.readbytes(1)[0]) == 0xFD:
+			#pode usar dados do s
+			fps += 1
+			#print "RECEBEU: ",s
+        
+	#print "ENVIOU:  ",to_send
         #time.sleep(0.01)
 while 0:
         #timers

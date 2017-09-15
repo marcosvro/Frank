@@ -4,7 +4,7 @@ import threading
 import time
 import os
 import ikpy as ik
-from ikpy import plot_utils
+#from ikpy import plot_utils
 import spidev
 
 
@@ -31,13 +31,13 @@ link2 = ik.link.URDFLink("joelho", [0,0,8.2] , [0,0,0], [0,1,0], use_symbolic_ma
 link3 = ik.link.URDFLink("quadril", [0,0,6.4], [0,0,0], [0,1,0], use_symbolic_matrix=True, bounds=(-80,80))
 link4 = ik.link.URDFLink("pelves", [0, 1.7, 4], [0, 0, 0], [1, 0, 0], use_symbolic_matrix=True, bounds=(-50,50))
 
-#perna - pé = target
+#perna - pe = target
 link5 = ik.link.URDFLink("pelves", [0,0,0], [0,0,0], [1,0,0], use_symbolic_matrix=True, bounds = (-50, 50))
 link6 = ik.link.URDFLink("quadril", [0,-1.7,-4], [0,0,0], [0,1,0], use_symbolic_matrix=True, bounds = (-80, 80))
 link7 = ik.link.URDFLink("joelho", [0,0,-6.4], [0,0,0], [0,1,0], use_symbolic_matrix=True, bounds = (-60, 60))
 link8 = ik.link.URDFLink("calc_frontal", [0,0,-8.2], [0,0,0], [0,1,0], use_symbolic_matrix=True, bounds = (-60, 60))
 link9 = ik.link.URDFLink("calc_lateral", [0,0,-0.7], [0,0,0], [1,0,0], use_symbolic_matrix=True, bounds = (-30, 30))
-link10 = ik.link.URDFLink("pé", [0,0,-0.7], [0,0,0], [0,0,0], use_symbolic_matrix=True)
+link10 = ik.link.URDFLink("pe", [0,0,-0.7], [0,0,0], [0,0,0], use_symbolic_matrix=True)
 
 
 #chains
@@ -55,16 +55,13 @@ pos_fix = [0, 1.7, 20.7]
 pos_inicial = [-(deslocamentoXpelves/2), 1.7, 20.7]
 
 
-frame_target = np.eye(4)
-frame_target[:3, 3] = pos_inicial
-ik = foot2pelv.inverse_kinematics(frame_target,initial_position=jointsf2p)
-
 #comunicacao
 spi = spidev.SpiDev()
 spi.open(0, 0)
 spi.max_speed_hz = 16000
 
-#FUNÇÕES
+
+#FUNCOES
 def thread_cinematica(indice):
 	#calcula cinematica inversa
 	pos = pos_inicial
