@@ -4,7 +4,6 @@ import time
 import ikpy as ik
 import spidev
 import tinyik
-import serial
 
 #outros parametros
 freq = 2*np.pi/3.
@@ -13,8 +12,6 @@ freq = 2*np.pi/3.
 spi = spidev.SpiDev()
 spi.open(0, 0)
 spi.max_speed_hz = 72000
-
-#ser = serial.Serial('/dev/ttyACM0', 9600)
 
 #perna esquerda
 link0 = ik.link.URDFLink("calc_esq", [0, 0, 0], [0, 0, 0], [0, 1, 0], use_symbolic_matrix=True, bounds=(-60,60))
@@ -53,27 +50,21 @@ start = time.time()
 t = 0
 t_fps = 0
 fps = 0
-fps2 = 0
-t_inercial = 0
 while 1:
         #timers
         dTime = time.time() - start
 	start = time.time()
 	t += dTime
 	t_fps += dTime
-	t_inercial += dTime
 
 	#fps calculator
- 	if t_fps > 1:
-                '''os.system("clear")
-                print "Tuplas/s:", fps
-		print "\n"
-		print "FPSext/s:", fps2
-                '''
-		t_fps = 0
+ 	'''if t_fps > 1:
+                os.system("clear")
+                print "fps:", fps
+                t_fps = 0
                 fps = 0
-		fps2 = 0
-	fps += 1        
+        fps += 1
+        '''
 
 	#solving inverse kinematic
         #variante = np.sin(t*freq) * 5
@@ -81,27 +72,42 @@ while 1:
         #arm.ee = target
         #ik = np.round(np.rad2deg(arm.angles))
         
-        #sending data to execute
-	to_send = np.array([254,0,1,2,3,4,5,6,7,253], dtype=np.uint8)
-        spi.writebytes(to_send.tolist())
-	
-	#Inercial Sensor
-	#if (t_inercial*1000) > 25:
-		#t_inercial = 0
-		#ser.write('#')
-		#iner = np.array([0., 0., 0., 0.], dtype=np.float)
-		#iner = ser.readline()
-		#print type(iner), iner
-	
-	#STM (comunicacao)
-	s = int(spi.readbytes(1)[0])
-	if s == 0xFE:
-		s = spi.readbytes(8)
-		if int(spi.readbytes(1)[0]) == 0xFD:
-			#pode usar dados do s
-			fps2 += 1
-			print "RECEBEU: ",s
-	#print "ENVIOU:  ",to_send
-        
-	
-	#time.sleep(0.01)
+        #sending data
+        to_send = np.array([255,0,1,2,3,4,5,6,7,254], dtype=np.uint8)
+	incioData = spi.readbytes(1);
+	inicioData == 255:spi.writebytes(to_send.tolist())
+	s=spi.readbytes(8);
+        print to_send
+	print s
+        #time.sleep(0.01)
+while 0:
+        #timers
+        dTime = time.time() - start
+	start = time.time()
+	t += dTime
+	t_fps += dTime
+
+	#fps calculator
+ 	if t_fps > 1:
+                os.system("clear")
+                print "fps:", fps
+                t_fps = 0
+                fps = 0
+        fps += 1
+
+	#solving inverse kinematic
+        variante = np.sin(t*freq) * 5
+        target[1] = variante
+        frame_target[:3, 3] = target
+        ik = perna_esq.inverse_kinematics(frame_target,initial_position=joints)
+        ik = np.rad2deg(ik)
+        ik = ik.astype('int8')
+
+        #sending to slave
+        to_send = np.array([127,0,1,2,3,4,5,6,7,8,9,10,11, -127], dtype=np.int8)
+        #to_send[0] = ik[0]
+        #to_send[1] = ik[1]
+        #to_send[2] = ik[2]
+        spi.xfer(to_send.tolist())
+        #print to_send
+        #time.sleep(0.01)
