@@ -12,7 +12,7 @@ freq = 2*np.pi/3.
 #comunicacao
 spi = spidev.SpiDev()
 spi.open(0, 0)
-spi.max_speed_hz = 72000
+spi.max_speed_hz = 3
 
 #ser = serial.Serial('/dev/ttyACM0', 9600)
 
@@ -94,13 +94,15 @@ while 1:
 		#print type(iner), iner
 	
 	#STM (comunicacao)
-	s = int(spi.readbytes(1)[0])
-	if s == 0xFE:
+	s = int(spi.readbytes(4)[0])
+	'''if s == 0xFE:
 		s = spi.readbytes(8)
 		if int(spi.readbytes(1)[0]) == 0xFD:
 			#pode usar dados do s
 			fps2 += 1
 			print "RECEBEU: ",s
+	'''
+	print "Recebeu: ", s
 	#print "ENVIOU:  ",to_send
         
 	
