@@ -65,7 +65,7 @@ spi.open(0, 0)
 spi.max_speed_hz = 16000'''
 
 #FUNÇÕES +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-'''Calcula cinematica inversa da pelves.
+'''Calcula cinematica inversa da pelves.   
 	parm: indice(int) - diz em qual posicao do vetor de tragetoria deve ser armazenada a cinematica e qual momento da tragetoria calcular'''
 def thread_cinematica_pelves(indice):
 	pos = pos_inicial_pelves
@@ -171,11 +171,26 @@ def calculaSinalY(tempo):
 #print(np.rad2deg(ik))
 #plot_chain(foot2pelv, juntas=jointsf2p)
 #plot_chain(pelv2foot, juntas=jointsp2f, alvo=pos_inicial_pe)
-print ("Calculando tragetoria.. ")
-calculaTragetoria()
-while threading.active_count() != 1:
-	os.system("clear")
-	print ("Calculando tragetoria.. (", threading.active_count(),"/",nEstados,")")
+
+#reading file
+try:
+	with open('data_foot.txt', 'r') as f:
+		data_foot = np.loadtxt('data_foot.txt').reshape((nEstados,8))
+		print ("File data_foot loaded!")	
+	with open('data_pelv.txt', 'r') as f:
+		data_pelv = np.loadtxt('data_pelv.txt').reshape((nEstados,8))
+		print ("File data_pelv loaded!")
+except IOError:
+	print ("Calculando tragetoria.. ")
+	calculaTragetoria()
+	while threading.active_count() != 0:
+		os.system("clear")
+		print ("Calculando tragetoria.. (", threading.active_count(),"/",nEstados,")")
+	np.savetxt('data_foot.txt', data_foot)
+	np.savetxt('data_pelv.txt', data_pelv)
+
+print(data_foot.shape)
+print(data_pelv.shape)
 
 
 #LOOP +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -208,6 +223,11 @@ while 1:
 	fps += 1
 	
 	#sending data
-	spi.writebytes(data[state].tolist())
-	#print (data[state])
+	#spi.writebytes(data[state].tolist())
+	to_send = [254]+data_pelv[state].tolist()+[253]
+	print (to_send)
 	#time.sleep(0.01)
+
+#END +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+f.close()
+
