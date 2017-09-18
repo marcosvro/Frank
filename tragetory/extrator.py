@@ -3,10 +3,8 @@ import threading
 #import cv2
 import time
 import os
-import ikpy as ik
-from ikpy import plot_utils
 import spidev
-
+import ikpy as ik
 
 
 #CONFIGS +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -65,7 +63,7 @@ spi.open(0, 0)
 spi.max_speed_hz = 16000'''
 #ser = serial.Serial('/dev/ttyACM0', 9600)
 
-#FUNÇÕES +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#FUNCOES +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 '''Calcula cinematica inversa da pelves.   
 	parm: indice(int) - diz em qual posicao do vetor de tragetoria deve ser armazenada a cinematica e qual momento da tragetoria calcular'''
 def thread_cinematica_pelves(indice):
@@ -167,11 +165,11 @@ def calculaSinalY(tempo):
 	Y = A*(1 + (l/g)*w*w)*np.sin(w*tempo)
 	return Y
 
-def gimbal(quaternion)
+def gimbal(quaternion):
 	v = np.array([0]*3, dtype=np.float)
 	gravity = np.array([0]*3, dtype=np.float)	
 	gravity[0] = 2 * (q[0]*q[2] - q[3]*q[1]);
-	gravity[1] = 2 * (q -> w*q -> x + q -> y*q -> z);
+	gravity[1] = 2 * (q[3]*q[0] + q[1]*q[2]);
 	gravity[2] = q[3]*q[3] - q[0]*q[0] - q[1]*q[1] + q[2]*q[2];
 	#yaw: (about Z axis)
 	v[0] = atan2(2*q[0]*q[1] - 2*q[3]*q[2], 2*q[3]*q[3] + 2*q[0]*q[0] - 1);
@@ -199,11 +197,11 @@ try:
 		data_pelv = np.loadtxt('data_pelv.txt').reshape((nEstados,8))
 		print ("File data_pelv loaded!")
 except IOError:
-	print ("Calculando tragetoria.. ")
+	print "Calculando tragetoria.. "
 	calculaTragetoria()
 	while threading.active_count() != 0:
 		os.system("clear")
-		print ("Calculando tragetoria.. (", threading.active_count(),"/",nEstados,")")
+		print "Calculando tragetoria.. (", threading.active_count(),"/",nEstados,")"
 	np.savetxt('data_foot.txt', data_foot)
 	np.savetxt('data_pelv.txt', data_pelv)
 
@@ -264,7 +262,7 @@ while 1:
 	'''
 	
 	#sending data
-	########################################	incluir iner no vetor de rotação	##############################################
+	########################################	incluir iner no vetor de rotacao	##############################################
 	to_send = [127]+data_pelv[state].tolist()+[-127]
 	#spi.writebytes(data[state].tolist())	
 	print to_send

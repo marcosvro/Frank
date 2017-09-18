@@ -83,7 +83,7 @@ while 1:
 		#print type(iner), iner
 		
 	#STM (comunicacao)
-	s = spi.readbytes(1)
+	s = spi.readbytes(1)[0]
 	if s == 0xFE:
 		s = spi.readbytes(8)
 		if int(spi.readbytes(1)[0]) == 0xFD:
