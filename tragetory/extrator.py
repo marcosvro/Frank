@@ -207,8 +207,8 @@ except IOError:
 	np.savetxt('data_foot.txt', data_foot)
 	np.savetxt('data_pelv.txt', data_pelv)
 
-print(data_foot.shape)
-print(data_pelv.shape)
+print data_foot.shape
+print data_pelv.shape
 
 
 #LOOP +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -265,9 +265,9 @@ while 1:
 	
 	#sending data
 	########################################	incluir iner no vetor de rotação	##############################################
-	to_send = [254]+data_pelv[state].tolist()+[253]
+	to_send = [127]+data_pelv[state].tolist()+[-127]
 	#spi.writebytes(data[state].tolist())	
-	print (to_send)
+	print to_send
 	#time.sleep(0.01)
 
 #END +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

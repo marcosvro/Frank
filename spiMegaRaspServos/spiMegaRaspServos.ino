@@ -69,7 +69,7 @@ typedef struct tanto
   byte pos[12];
 }bloco;
 
-char faz[12];
+char faz[8];
 bool state = false;
 
 void setup() {
@@ -90,18 +90,19 @@ void setup() {
 
 ISR (SPI_STC_vect){
   //delayMicroseconds(100);
-  state = SPI_readAnything(faz, 12);
+  state = SPI_readAnything(faz, 8);
 }// end of interrupt routine SPI_STC_vect
 
 void loop() {
   if(state){
     //walkState(int(faz.pos[0]),int(faz.pos[1]),int(faz.pos[2]),int(faz.pos[3]),int(faz.pos[4]),int(faz.pos[5]),int(faz.pos[6]),int(faz.pos[7]),int(faz.pos[8]),int(faz.pos[9]),int(faz.pos[10]),int(faz.pos[11]));
     state = false;
-    for(int i = 0; i < 12; i++){
+    for(int i = 0; i < 8; i++){
       Serial.print(int(faz[i]));
       Serial.print(" ");
     }
     Serial.println();
+    walkState();
   }
 }
 
@@ -115,10 +116,6 @@ void initServos() {
   q[5] = motors[5];
   q[6] = motors[6];
   q[7] = motors[7];
-  q[8] = motors[8];
-  q[9] = motors[9];
-  q[10] = motors[10];
-  q[11] = motors[11];
 
   servo_0.attach(PIN_SERVO_0, MIN_RANGE_SERVO_0, MAX_RANGE_SERVO_0);
   writeServos(tempoDelayServo);
@@ -136,30 +133,13 @@ void initServos() {
   writeServos(tempoDelayServo);
   servo_7.attach(PIN_SERVO_7, MIN_RANGE_SERVO_7, MAX_RANGE_SERVO_7);
   writeServos(tempoDelayServo);
-  servo_8.attach(PIN_SERVO_8, MIN_RANGE_SERVO_8, MAX_RANGE_SERVO_8);
-  writeServos(tempoDelayServo);
-  servo_9.attach(PIN_SERVO_9, MIN_RANGE_SERVO_9, MAX_RANGE_SERVO_9);
-  writeServos(tempoDelayServo);
-  servo_10.attach(PIN_SERVO_10, MIN_RANGE_SERVO_10, MAX_RANGE_SERVO_10);
-  writeServos(tempoDelayServo);
-  servo_11.attach(PIN_SERVO_11, MIN_RANGE_SERVO_11, MAX_RANGE_SERVO_11);
-  writeServos(tempoDelayServo);
 }
 
-void walkState(int peE,int calcE,int joelhoE, int coxaE, int quadrilE, int pelvE, int pelvD, int quadrilD, int coxaD, int joelhoD,int calcD, int peD) {
+void walkState() {
   
-  motors[0] = q[0] + peE;
-  motors[1] = q[1] + calcE;
-  motors[2] = q[2] + joelhoE;
-  motors[3] = q[3] + coxaE;
-  motors[4] = q[4] + quadrilE;
-  motors[5] = q[5] + pelvE;
-  motors[6] = q[6] + pelvD;
-  motors[7] = q[7] + quadrilD;
-  motors[8] = q[8] + coxaD;
-  motors[9] = q[9] + joelhoD;
-  motors[10] = q[10] + calcD;
-  motors[11] = q[11] + peD;
+  for(int i =0; i<8; i++) {
+     motors[i] = q[i] + faz[i];
+  }
   
   writeServos(tempoDelayServo);
 }
@@ -173,9 +153,6 @@ void writeServos(int espera) {
   servo_5.writeMicroseconds(map(motors[5], 0, 180, MIN_RANGE_SERVO_5, MAX_RANGE_SERVO_5));
   servo_6.writeMicroseconds(map(motors[6], 0, 180, MIN_RANGE_SERVO_6, MAX_RANGE_SERVO_6));
   servo_7.writeMicroseconds(map(motors[7], 0, 180, MIN_RANGE_SERVO_7, MAX_RANGE_SERVO_7));
-  servo_8.writeMicroseconds(map(motors[8], 0, 180, MIN_RANGE_SERVO_8, MAX_RANGE_SERVO_8));
-  servo_9.writeMicroseconds(map(motors[9], 0, 180, MIN_RANGE_SERVO_9, MAX_RANGE_SERVO_9));
-  servo_10.writeMicroseconds(map(motors[10], 0, 180, MIN_RANGE_SERVO_10, MAX_RANGE_SERVO_10));
-  servo_11.writeMicroseconds(map(motors[11], 0, 180, MIN_RANGE_SERVO_11, MAX_RANGE_SERVO_11));
+
   delay(espera);
 }

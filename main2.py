@@ -3,7 +3,6 @@ import os
 import time
 import ikpy as ik
 import spidev
-import tinyik
 import serial
 
 #outros parametros
@@ -12,7 +11,7 @@ freq = 2*np.pi/3.
 #comunicacao
 spi = spidev.SpiDev()
 spi.open(0, 0)
-spi.max_speed_hz = 3
+spi.max_speed_hz = 72000
 
 #ser = serial.Serial('/dev/ttyACM0', 9600)
 
@@ -44,10 +43,6 @@ ik = np.rad2deg(ik)
 ik = ik.astype('int8')
 
 
-
-arm = tinyik.Actuator(['y', [0,0,0],'x',[0,0,0],'y',[5,0,10],'y',[-5,0,13]])
-
-
 #LOOP
 start = time.time()
 t = 0
@@ -74,12 +69,6 @@ while 1:
                 fps = 0
 		fps2 = 0
 	fps += 1        
-
-	#solving inverse kinematic
-        #variante = np.sin(t*freq) * 5
-        #target[1] = variante
-        #arm.ee = target
-        #ik = np.round(np.rad2deg(arm.angles))
         
         #sending data to execute
 	to_send = np.array([254,0,1,2,3,4,5,6,7,253], dtype=np.uint8)
@@ -94,15 +83,13 @@ while 1:
 		#print type(iner), iner
 	
 	#STM (comunicacao)
-	s = int(spi.readbytes(4)[0])
-	'''if s == 0xFE:
+	if s == 0xFE:
 		s = spi.readbytes(8)
 		if int(spi.readbytes(1)[0]) == 0xFD:
 			#pode usar dados do s
 			fps2 += 1
 			print "RECEBEU: ",s
-	'''
-	print "Recebeu: ", s
+	
 	#print "ENVIOU:  ",to_send
         
 	
