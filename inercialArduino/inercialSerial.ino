@@ -268,8 +268,8 @@ void processAccelGyro()
     mpu.dmpGetQuaternion(&q, fifoBuffer);
     mpu.dmpGetGravity(&gravity, &q);
     mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-    mpuPitch = ypr[PITCH] * 180 / M_PI;
     mpuRoll = ypr[ROLL] * 180 / M_PI;
+    mpuPitch = ypr[PITCH] * 180 / M_PI;
     mpuYaw  = ypr[YAW] * 180 / M_PI;
 
     // flush buffer to prevent overflow

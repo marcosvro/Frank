@@ -63,6 +63,7 @@ pos_inicial_pe = [-(deslocamentoXpes/2), -1.7, -20.7]
 '''spi = spidev.SpiDev()
 spi.open(0, 0)
 spi.max_speed_hz = 16000'''
+#ser = serial.Serial('/dev/ttyACM0', 9600)
 
 #FUNÇÕES +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 '''Calcula cinematica inversa da pelves.   
@@ -166,11 +167,28 @@ def calculaSinalY(tempo):
 	Y = A*(1 + (l/g)*w*w)*np.sin(w*tempo)
 	return Y
 
+def gimbal(quaternion)
+	v = np.array([0]*3, dtype=np.float)
+	gravity = np.array([0]*3, dtype=np.float)	
+	gravity[0] = 2 * (q[0]*q[2] - q[3]*q[1]);
+	gravity[1] = 2 * (q -> w*q -> x + q -> y*q -> z);
+	gravity[2] = q[3]*q[3] - q[0]*q[0] - q[1]*q[1] + q[2]*q[2];
+	#yaw: (about Z axis)
+	v[0] = atan2(2*q[0]*q[1] - 2*q[3]*q[2], 2*q[3]*q[3] + 2*q[0]*q[0] - 1);
+	#pitch: (nose up/down, about Y axis)
+	v[1] = atan(gravity[0] / sqrt(gravity[1]*gravity[1] + gravity[2]*gravity[2]));
+	#roll: (tilt left/right, about X axis)
+	v[2] = atan(gravity[1] / sqrt(gravity[0]*gravity[0] + gravity[2]*gravity[2]));
+	v = np.rad2deg(v)
+	v = v.astype(np.int8)
+	return v
+
 
 #SETUP +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #print(np.rad2deg(ik))
 #plot_chain(foot2pelv, juntas=jointsf2p)
 #plot_chain(pelv2foot, juntas=jointsp2f, alvo=pos_inicial_pe)
+iner = np.array([0., 0., 0., 0.], dtype=np.float)
 
 #reading file
 try:
@@ -198,6 +216,7 @@ start = time.time()
 t = 0.
 t_fps = 0.
 t_state = 0.
+t_inercial = 0.
 state = 0
 fps = 0
 
@@ -208,23 +227,46 @@ while 1:
 	t += dTime
 	t_fps += dTime
 	t_state += dTime
-
+	t_inercial += dTime
+	
 	#change state
 	if(t_state >= frameRate):
 		t_state = 0
 		state = (state+1)%nEstados
 
+
 	#fps calculator
-	if t_fps > 1:
+	'''if t_fps > 1:
 		os.system("clear")
 		print ("fps:", fps)
 		t_fps = 0
 		fps = 0
 	fps += 1
+	'''
+
+	#Inercial Sensor
+	'''if (t_inercial*1000) > 25:
+		t_inercial = 0
+		ser.write('#')
+		qua = ser.readline()
+		iner = gimbal(qua)
+	'''
+	
+	
+	
+	#STM (comunicacao)
+	'''if s == 0xFE:
+		s = spi.readbytes(8)
+		if int(spi.readbytes(1)[0]) == 0xFD:
+			#pode usar dados do s
+			fps2 += 1
+			print "RECEBEU: ",s
+	'''
 	
 	#sending data
-	#spi.writebytes(data[state].tolist())
+	########################################	incluir iner no vetor de rotação	##############################################
 	to_send = [254]+data_pelv[state].tolist()+[253]
+	#spi.writebytes(data[state].tolist())	
 	print (to_send)
 	#time.sleep(0.01)
 
