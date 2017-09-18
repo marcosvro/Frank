@@ -81,15 +81,17 @@ while 1:
 		#iner = np.array([0., 0., 0., 0.], dtype=np.float)
 		#iner = ser.readline()
 		#print type(iner), iner
-	
+		
 	#STM (comunicacao)
+	s = spi.readbytes(1)
 	if s == 0xFE:
 		s = spi.readbytes(8)
 		if int(spi.readbytes(1)[0]) == 0xFD:
 			#pode usar dados do s
 			fps2 += 1
 			print "RECEBEU: ",s
-	
+	else:
+		print "Dado errado: ", s
 	#print "ENVIOU:  ",to_send
         
 	
