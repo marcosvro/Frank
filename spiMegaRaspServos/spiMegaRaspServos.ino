@@ -90,23 +90,26 @@ void setup()
 
 void loop() {
 
-  if(Serial.available() && Serial.read() == 127){
+  if(Serial.available() && Serial.read() == 255){
     for(int i = 0; i< 8; i++) {
       faz[i] = Serial.read();
     }
-    ver = Serial.read();
-    if (ver == -127) {
+    char ver = Serial.read();
+    if (ver == 254) {
       state = true;
     }
   }
   
   if(state){
     state = false;
-    for(int i = 0; i < 8; i++){
-      Serial.print(int(faz[i]));
-      Serial.print(" ");
-    }
-    Serial.println();
+//    for(int i = 0; i < 8; i++){
+//      Serial.print(faz[i]);
+//      //Serial.print(" ");
+//    }
+    Serial.println("Recebido e nos conformes!!");
+    digitalWrite(13, HIGH);
+    delay(100);
+    digitalWrite(13, LOW);
     walkState();
   }
 }
