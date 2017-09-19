@@ -90,8 +90,8 @@ while 1:
 			#pode usar dados do s
 			fps2 += 1
 			print "RECEBEU: ",s
-	else:
-		print "Dado errado: ", s
+	#else:
+	#	print "Dado errado: ", s
 	#print "ENVIOU:  ",to_send
         
 	
