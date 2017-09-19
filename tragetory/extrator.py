@@ -219,6 +219,10 @@ state = 0
 fps = 0
 
 while 1:
+	#sending data
+	########################################	incluir iner no vetor de rotacao	##############################################
+	to_send = [127]+data_pelv[state].tolist()+[-127]	
+
 	#timers
 	dTime = time.time() - start
 	start = time.time()
@@ -242,7 +246,7 @@ while 1:
 	fps += 1
 	'''
 
-	#Inercial Sensor
+	#NANO (comunicação) - luiz
 	'''if (t_inercial*1000) > 25:
 		t_inercial = 0
 		ser.write('#')
@@ -252,19 +256,20 @@ while 1:
 	
 	
 	
-	#STM (comunicacao)
+	#STM (comunicacao) - simoes
 	'''if s == 0xFE:
 		s = spi.readbytes(8)
 		if int(spi.readbytes(1)[0]) == 0xFD:
 			#pode usar dados do s
 			fps2 += 1
 			print "RECEBEU: ",s
+	spi.writebytes(to_send)
 	'''
 	
-	#sending data
-	########################################	incluir iner no vetor de rotacao	##############################################
-	to_send = [127]+data_pelv[state].tolist()+[-127]
-	#spi.writebytes(data[state].tolist())	
+	#MEGA (comunicacao) marcos -teste
+	ser.write(to_send)
+	
+		
 	print to_send
 	#time.sleep(0.01)
 

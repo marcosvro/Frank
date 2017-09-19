@@ -5,48 +5,36 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define PIN_SERVO_0 13//pe E
-#define PIN_SERVO_1 18//calcanhar E
-#define PIN_SERVO_2 17 //joelho E
-#define PIN_SERVO_3 16//coxa E
-#define PIN_SERVO_4 15//quadril E
-#define PIN_SERVO_5 0//bacia E
-#define PIN_SERVO_6 4//bacia D
-#define PIN_SERVO_7 5//quadril D
-#define PIN_SERVO_8 6//coxa D
-#define PIN_SERVO_9 7//joelho D
-#define PIN_SERVO_10 12//calcanhar D
-#define PIN_SERVO_11 13// pe D 
 
-//perna esquerda para direita 0-7
-#define MIN_RANGE_SERVO_0 700 //pe E ( 38 )
-#define MIN_RANGE_SERVO_1 600 //calcanhar E - (1F)
-#define MIN_RANGE_SERVO_2 700 //joelho E - 36 
-#define MIN_RANGE_SERVO_3 600//coxa E- 43
-#define MIN_RANGE_SERVO_4 600//quadril E - 12N
-#define MIN_RANGE_SERVO_5 700//bacia E
-#define MIN_RANGE_SERVO_6 700//bacia D
-#define MIN_RANGE_SERVO_7 700//quadril D - 10N
-#define MIN_RANGE_SERVO_8 700//coxa D 2F
-#define MIN_RANGE_SERVO_9 700//joelho D - 37
-#define MIN_RANGE_SERVO_10 600 //calcanhar D - (11N)
-#define MIN_RANGE_SERVO_11 700// pe D (39 )
+#define PIN_SERVO_0 13
+#define PIN_SERVO_1 18
+#define PIN_SERVO_2 17
+#define PIN_SERVO_3 16
+#define PIN_SERVO_4 15
+#define PIN_SERVO_5 0
+#define PIN_SERVO_6 4
+#define PIN_SERVO_7 5
 
-#define MAX_RANGE_SERVO_0 2200
-#define MAX_RANGE_SERVO_1 2300
-#define MAX_RANGE_SERVO_2 2200
-#define MAX_RANGE_SERVO_3 2700
-#define MAX_RANGE_SERVO_4 2700
-#define MAX_RANGE_SERVO_5 2300
-#define MAX_RANGE_SERVO_6 2300
-#define MAX_RANGE_SERVO_7 2300
-#define MAX_RANGE_SERVO_8 2300
-#define MAX_RANGE_SERVO_9 2500
-#define MAX_RANGE_SERVO_10 2300
-#define MAX_RANGE_SERVO_11 2400 
+#define MIN_RANGE_SERVO_0 700 //calcanhar_eixo_X
+#define MIN_RANGE_SERVO_1 700 //calcanhar_eixo_Y
+#define MIN_RANGE_SERVO_2 700 //joelho
+#define MIN_RANGE_SERVO_3 700 //coxa
+#define MIN_RANGE_SERVO_4 700 //pelves
+#define MIN_RANGE_SERVO_5 700 //bacia
+#define MIN_RANGE_SERVO_6 700 //ombro
+#define MIN_RANGE_SERVO_7 700 //cotovelo
 
-int motors[] = {90, 90, 90, 90, 90, 180, 173, 90, 90, 90, 130, 90}; //posição motores
-int q[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};     //posição inicial calibração copia
+#define MAX_RANGE_SERVO_0 2400
+#define MAX_RANGE_SERVO_1 2400
+#define MAX_RANGE_SERVO_2 2400
+#define MAX_RANGE_SERVO_3 2400
+#define MAX_RANGE_SERVO_4 2400
+#define MAX_RANGE_SERVO_5 2400
+#define MAX_RANGE_SERVO_6 2400
+#define MAX_RANGE_SERVO_7 2400
+
+int motors[] = {90, 90, 90, 90, 90, 90, 90, 90}; //posição motores
+int qi[] = {0, 0, 0, 0, 0, 0, 0, 0};     //posição inicial calibração copia
 
 Servo servo_0;
 Servo servo_1;
@@ -56,12 +44,8 @@ Servo servo_4;
 Servo servo_5;
 Servo servo_6;
 Servo servo_7;
-Servo servo_8;
-Servo servo_9;
-Servo servo_10;
-Servo servo_11;
 
-int tempoDelayServo = 50;
+int tempoDelayServo = 0;
 
 typedef struct tanto
 {
@@ -72,8 +56,18 @@ typedef struct tanto
 char faz[8];
 bool state = false;
 
-void setup() {
-  Serial.begin (9600);   // debugging
+ISR (SPI_STC_vect){
+  //delayMicroseconds(100);
+  state = SPI_readAnything(faz, 8);
+}// end of interrupt routine SPI_STC_vect
+
+// ================================================================
+// ===                      INITIAL SETUP                       ===
+// ================================================================
+
+void setup()
+{
+  Serial.begin(9600);
 
   // have to send on master in, *slave out*
   pinMode(MISO, OUTPUT);
@@ -88,14 +82,25 @@ void setup() {
   
 }
 
-ISR (SPI_STC_vect){
-  //delayMicroseconds(100);
-  state = SPI_readAnything(faz, 8);
-}// end of interrupt routine SPI_STC_vect
+
+
+// ================================================================
+// ===                    MAIN PROGRAM LOOP                     ===
+// ================================================================
 
 void loop() {
+
+  if(Serial.available() && Serial.read() == 127){
+    for(int i = 0; i< 8; i++) {
+      faz[i] = Serial.read();
+    }
+    ver = Serial.read();
+    if (ver == -127) {
+      state = true;
+    }
+  }
+  
   if(state){
-    //walkState(int(faz.pos[0]),int(faz.pos[1]),int(faz.pos[2]),int(faz.pos[3]),int(faz.pos[4]),int(faz.pos[5]),int(faz.pos[6]),int(faz.pos[7]),int(faz.pos[8]),int(faz.pos[9]),int(faz.pos[10]),int(faz.pos[11]));
     state = false;
     for(int i = 0; i < 8; i++){
       Serial.print(int(faz[i]));
@@ -108,14 +113,14 @@ void loop() {
 
 void initServos() {
 
-  q[0] = motors[0];
-  q[1] = motors[1];
-  q[2] = motors[2];
-  q[3] = motors[3];
-  q[4] = motors[4];
-  q[5] = motors[5];
-  q[6] = motors[6];
-  q[7] = motors[7];
+  qi[0] = motors[0];
+  qi[1] = motors[1];
+  qi[2] = motors[2];
+  qi[3] = motors[3];
+  qi[4] = motors[4];
+  qi[5] = motors[5];
+  qi[6] = motors[6];
+  qi[7] = motors[7];
 
   servo_0.attach(PIN_SERVO_0, MIN_RANGE_SERVO_0, MAX_RANGE_SERVO_0);
   writeServos(tempoDelayServo);
@@ -138,7 +143,7 @@ void initServos() {
 void walkState() {
   
   for(int i =0; i<8; i++) {
-     motors[i] = q[i] + faz[i];
+     motors[i] = qi[i] + faz[i];
   }
   
   writeServos(tempoDelayServo);
